@@ -24,17 +24,17 @@ class CSPMiddleware(object):
 
         ua = request.META.get('HTTP_USER_AGENT', '')
         webkit = 'webkit' in ua.lower()
-        header = 'X-WebKit-CSP' if webkit else 'X-Content-Security-Policy'
-        if getattr(settings, 'CSP_REPORT_ONLY', False):
-            header += '-Report-Only'
+        for header in ['X-WebKit-CSP', 'X-Content-Security-Policy', 'Content-Security-Policy']:
+            if getattr(settings, 'CSP_REPORT_ONLY', False):
+                header += '-Report-Only'
 
-        if header in response:
-            # Don't overwrite existing headers.
-            return response
+            if header in response:
+                # Don't overwrite existing headers.
+                return response
 
-        config = getattr(response, '_csp_config', None)
-        update = getattr(response, '_csp_update', None)
-        replace = getattr(response, '_csp_replace', None)
-        response[header] = build_policy(config=config, update=update,
+            config = getattr(response, '_csp_config', None)
+            update = getattr(response, '_csp_update', None)
+            replace = getattr(response, '_csp_replace', None)
+            response[header] = build_policy(config=config, update=update,
                                         replace=replace)
         return response
